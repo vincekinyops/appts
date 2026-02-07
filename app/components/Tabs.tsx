@@ -1,4 +1,4 @@
-type TabId = "calendar" | "activities" | "dashboard";
+type TabId = "calendar" | "activities" | "dashboard" | "admin";
 
 type TabsProps = {
   activeTab: TabId;
@@ -10,6 +10,7 @@ export function Tabs({ activeTab, onChange }: TabsProps) {
     { id: "calendar", label: "Calendar" },
     { id: "activities", label: "Activities" },
     { id: "dashboard", label: "Dashboard" },
+    { id: "admin", label: "Admin" },
   ];
 
   return (

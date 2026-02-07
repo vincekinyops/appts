@@ -4,7 +4,9 @@ import type {
   AppointmentOption,
   CalendarEvent,
   CommunicationEntry,
+  Dentist,
   PreviousPatient,
+  StaffMember,
 } from "@/app/lib/types";
 import { referralOptions } from "@/app/lib/constants";
 import { formatFullName, formatReadableDate } from "@/app/lib/formatters";
@@ -18,6 +20,8 @@ type ActivitiesSectionProps = {
   communications: CommunicationEntry[];
   events: CalendarEvent[];
   isLoading: boolean;
+  dentists: Dentist[];
+  staff: StaffMember[];
 };
 
 export function ActivitiesSection({
@@ -29,18 +33,25 @@ export function ActivitiesSection({
   communications,
   events,
   isLoading,
+  dentists,
+  staff,
 }: ActivitiesSectionProps) {
+  const createdByOptions = [
+    ...staff.map((member) => ({ id: member.id, name: member.name })),
+    ...dentists.map((dentist) => ({ id: dentist.id, name: dentist.name })),
+  ];
+
   return (
-    <section className="grid gap-6 lg:grid-cols-[1.1fr_1fr]">
+    <section className="grid gap-6">
       <div className="rounded-md border border-zinc-200 bg-white p-6 shadow-sm">
         <h2 className="text-xl font-semibold">Activities</h2>
         <p className="text-sm text-[color:var(--foreground)]/70">
           Capture patient outreach details for every interaction.
         </p>
 
-        <form className="mt-6 grid gap-4" onSubmit={onSubmit}>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <label className="grid gap-2 text-sm font-medium text-zinc-700 sm:col-span-2">
+        <form className="activities-form mt-6 grid gap-4" onSubmit={onSubmit}>
+          <div className="grid gap-4 lg:grid-cols-2 lg:items-start">
+            <label className="grid gap-2 text-sm font-medium text-zinc-700">
               Previous Patient
               <select
                 value=""
@@ -73,44 +84,31 @@ export function ActivitiesSection({
                 ))}
               </select>
             </label>
-            <label className="grid gap-2 text-sm font-medium text-zinc-700 sm:col-span-2">
-              Link Appointment (optional)
+            <label className="grid gap-2 text-sm font-medium text-zinc-700">
+              Current Dentist
               <select
-                value={form.appointmentId}
-                onChange={(event) => {
-                  const appointmentId = event.target.value;
-                  const selected = appointmentOptions.find(
-                    (option) => option.id === appointmentId,
-                  );
-                  if (selected) {
-                    onFormChange((prev) => ({
-                      ...prev,
-                      appointmentId,
-                      date: selected.event.date,
-                      patientFirstName: selected.event.patient_first_name,
-                      patientMiddleName:
-                        selected.event.patient_middle_name ?? "",
-                      patientLastName: selected.event.patient_last_name,
-                    }));
-                  } else {
-                    onFormChange((prev) => ({
-                      ...prev,
-                      appointmentId: "",
-                    }));
-                  }
-                }}
+                value={form.currentDentist}
+                onChange={(event) =>
+                  onFormChange((prev) => ({
+                    ...prev,
+                    currentDentist: event.target.value,
+                  }))
+                }
                 className="rounded-md border border-zinc-200 px-3 py-2 pr-10 text-sm"
               >
-                <option value="">No linked appointment</option>
-                {appointmentOptions.map((option) => (
-                  <option key={option.id} value={option.id}>
-                    {option.label}
+                <option value="">Select dentist</option>
+                {dentists.map((dentist) => (
+                  <option key={dentist.id} value={dentist.name}>
+                    {dentist.name}
                   </option>
                 ))}
               </select>
             </label>
+
             <label className="grid gap-2 text-sm font-medium text-zinc-700">
-              Date
+              <span>
+                Date <span className="text-red-600">*</span>
+              </span>
               <input
                 type="date"
                 value={form.date}
@@ -124,9 +122,35 @@ export function ActivitiesSection({
                 className="rounded-md border border-zinc-200 px-3 py-2 text-sm"
               />
             </label>
-            <div className="grid gap-4 sm:col-span-2 sm:grid-cols-3">
+            <label className="grid gap-2 text-sm font-medium text-zinc-700">
+              <span>
+                Created By <span className="text-red-600">*</span>
+              </span>
+              <select
+                value={form.createdBy}
+                onChange={(event) =>
+                  onFormChange((prev) => ({
+                    ...prev,
+                    createdBy: event.target.value,
+                  }))
+                }
+                required
+                className="rounded-md border border-zinc-200 px-3 py-2 pr-10 text-sm"
+              >
+                <option value="">Select staff or dentist</option>
+                {createdByOptions.map((member) => (
+                  <option key={member.id} value={member.name}>
+                    {member.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <div className="grid gap-4 sm:grid-cols-3">
               <label className="grid gap-2 text-sm font-medium text-zinc-700">
-                First Name
+                <span>
+                  First Name <span className="text-red-600">*</span>
+                </span>
                 <input
                   type="text"
                   value={form.patientFirstName}
@@ -155,7 +179,9 @@ export function ActivitiesSection({
                 />
               </label>
               <label className="grid gap-2 text-sm font-medium text-zinc-700">
-                Last Name
+                <span>
+                  Last Name <span className="text-red-600">*</span>
+                </span>
                 <input
                   type="text"
                   value={form.patientLastName}
@@ -171,49 +197,6 @@ export function ActivitiesSection({
               </label>
             </div>
             <label className="grid gap-2 text-sm font-medium text-zinc-700">
-              School Year
-              <input
-                type="text"
-                value={form.schoolYear}
-                onChange={(event) =>
-                  onFormChange((prev) => ({
-                    ...prev,
-                    schoolYear: event.target.value,
-                  }))
-                }
-                required
-                className="rounded-md border border-zinc-200 px-3 py-2 text-sm"
-              />
-            </label>
-            <label className="grid gap-2 text-sm font-medium text-zinc-700">
-              Current Dentist
-              <input
-                type="text"
-                value={form.currentDentist}
-                onChange={(event) =>
-                  onFormChange((prev) => ({
-                    ...prev,
-                    currentDentist: event.target.value,
-                  }))
-                }
-                className="rounded-md border border-zinc-200 px-3 py-2 text-sm"
-              />
-            </label>
-            <label className="grid gap-2 text-sm font-medium text-zinc-700">
-              Language
-              <input
-                type="text"
-                value={form.language}
-                onChange={(event) =>
-                  onFormChange((prev) => ({
-                    ...prev,
-                    language: event.target.value,
-                  }))
-                }
-                className="rounded-md border border-zinc-200 px-3 py-2 text-sm"
-              />
-            </label>
-            <label className="grid gap-2 text-sm font-medium text-zinc-700">
               Date Called
               <input
                 type="date"
@@ -226,6 +209,36 @@ export function ActivitiesSection({
                 }
                 className="rounded-md border border-zinc-200 px-3 py-2 text-sm"
               />
+            </label>
+
+            <label className="grid gap-2 text-sm font-medium text-zinc-700">
+              <span>
+                School Year <span className="text-red-600">*</span>
+              </span>
+              <select
+                value={form.schoolYear}
+                onChange={(event) =>
+                  onFormChange((prev) => ({
+                    ...prev,
+                    schoolYear: event.target.value,
+                  }))
+                }
+                required
+                className="rounded-md border border-zinc-200 px-3 py-2 pr-10 text-sm"
+              >
+                <option value="">Select year</option>
+                {Array.from(
+                  { length: new Date().getFullYear() - 1999 },
+                  (_, i) => {
+                    const year = new Date().getFullYear() - i;
+                    return (
+                      <option key={year} value={`${year}`}>
+                        {year}
+                      </option>
+                    );
+                  },
+                )}
+              </select>
             </label>
             <label className="grid gap-2 text-sm font-medium text-zinc-700">
               Date Emailed
@@ -241,6 +254,22 @@ export function ActivitiesSection({
                 className="rounded-md border border-zinc-200 px-3 py-2 text-sm"
               />
             </label>
+
+            <label className="grid gap-2 text-sm font-medium text-zinc-700">
+              Language
+              <input
+                type="text"
+                value={form.language}
+                onChange={(event) =>
+                  onFormChange((prev) => ({
+                    ...prev,
+                    language: event.target.value,
+                  }))
+                }
+                className="rounded-md border border-zinc-200 px-3 py-2 text-sm"
+              />
+            </label>
+
             <label className="grid gap-2 text-sm font-medium text-zinc-700">
               Referral Type
               <select
@@ -260,36 +289,23 @@ export function ActivitiesSection({
                 ))}
               </select>
             </label>
+
+            <label className="grid gap-2 text-sm font-medium text-zinc-700 lg:row-span-2">
+              Notes
+              <textarea
+                value={form.notes}
+                onChange={(event) =>
+                  onFormChange((prev) => ({
+                    ...prev,
+                    notes: event.target.value,
+                  }))
+                }
+                rows={6}
+                className="rounded-md border border-zinc-200 px-3 py-2 text-sm"
+              />
+            </label>
+            <div className="hidden lg:block" />
           </div>
-          <label className="grid gap-2 text-sm font-medium text-zinc-700">
-            Notes
-            <textarea
-              value={form.notes}
-              onChange={(event) =>
-                onFormChange((prev) => ({
-                  ...prev,
-                  notes: event.target.value,
-                }))
-              }
-              rows={4}
-            className="rounded-md border border-zinc-200 px-3 py-2 text-sm"
-            />
-          </label>
-          <label className="grid gap-2 text-sm font-medium text-zinc-700">
-            Created By
-            <input
-              type="text"
-              value={form.createdBy}
-              onChange={(event) =>
-                onFormChange((prev) => ({
-                  ...prev,
-                  createdBy: event.target.value,
-                }))
-              }
-              required
-            className="rounded-md border border-zinc-200 px-3 py-2 text-sm"
-            />
-          </label>
           <button
             type="submit"
             className="mt-2 rounded-md bg-[color:var(--primary)] px-4 py-2 text-sm font-semibold text-white transition hover:opacity-90"

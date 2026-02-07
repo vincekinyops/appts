@@ -70,3 +70,20 @@ input[type="time"]::-webkit-calendar-picker-indicator {
   margin-right: 0;
   padding: 0;
 }
+
+.activities-form input,
+.activities-form select,
+.activity-modal-form input,
+.activity-modal-form select {
+  height: 2.5rem;
+}
+
+.activities-form textarea,
+.activity-modal-form textarea {
+  min-height: 120px;
+}
+
+.activities-form label,
+.activity-modal-form label {
+  gap: 0.25rem;
+}

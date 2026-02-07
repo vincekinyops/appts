@@ -64,7 +64,9 @@ export function AppointmentModal({
 
         <div className="mt-4 grid gap-4">
           <label className="grid gap-2 text-sm font-medium text-zinc-700">
-            Title
+            <span>
+              Title <span className="text-red-600">*</span>
+            </span>
             <input
               type="text"
               value={form.title}
@@ -74,6 +76,7 @@ export function AppointmentModal({
                   title: event.target.value,
                 }))
               }
+              required
             className="rounded-md border border-zinc-200 px-3 py-2 text-sm"
               placeholder="Appointment name"
             />
@@ -142,7 +145,9 @@ export function AppointmentModal({
             </label>
             <div className="grid gap-4 sm:col-span-2 sm:grid-cols-3">
               <label className="grid min-w-0 gap-2 text-sm font-medium text-zinc-700">
-                First Name
+                <span>
+                  First Name <span className="text-red-600">*</span>
+                </span>
                 <input
                   type="text"
                   value={form.patientFirstName}
@@ -171,7 +176,9 @@ export function AppointmentModal({
                 />
               </label>
               <label className="grid min-w-0 gap-2 text-sm font-medium text-zinc-700">
-                Last Name
+                <span>
+                  Last Name <span className="text-red-600">*</span>
+                </span>
                 <input
                   type="text"
                   value={form.patientLastName}

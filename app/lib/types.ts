@@ -70,3 +70,15 @@ export type ActivityForm = {
   createdBy: string;
   appointmentId: string;
 };
+
+export type Dentist = {
+  id: string;
+  name: string;
+  created_at: string;
+};
+
+export type StaffMember = {
+  id: string;
+  name: string;
+  created_at: string;
+};

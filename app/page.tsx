@@ -4,6 +4,7 @@ import { type FormEvent, useEffect, useMemo, useState } from "react";
 import { isSupabaseConfigured, supabase } from "@/lib/supabaseClient";
 import { ActivityModal } from "@/app/components/ActivityModal";
 import { ActivitiesSection } from "@/app/components/ActivitiesSection";
+import { AdminSection } from "@/app/components/AdminSection";
 import { AppointmentModal } from "@/app/components/AppointmentModal";
 import { AppointmentsListModal } from "@/app/components/AppointmentsListModal";
 import { CalendarSection } from "@/app/components/CalendarSection";
@@ -23,11 +24,13 @@ import type {
   AppointmentStatus,
   CalendarEvent,
   CommunicationEntry,
+  Dentist,
+  StaffMember,
 } from "@/app/lib/types";
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState<
-    "calendar" | "activities" | "dashboard"
+    "calendar" | "activities" | "dashboard" | "admin"
   >("calendar");
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [communications, setCommunications] = useState<CommunicationEntry[]>([]);
@@ -68,6 +71,8 @@ export default function Home() {
     items: CalendarEvent[];
     anchorRect: DOMRect | null;
   }>({ date: null, items: [], anchorRect: null });
+  const [dentists, setDentists] = useState<Dentist[]>([]);
+  const [staff, setStaff] = useState<StaffMember[]>([]);
   const [activityModalForm, setActivityModalForm] = useState<ActivityForm>({
     date: toIsoDate(new Date()),
     patientFirstName: "",
@@ -187,6 +192,26 @@ export default function Home() {
         setLoadError(commError.message);
       } else {
         setCommunications(commData ?? []);
+      }
+
+      const { data: dentistData, error: dentistError } = await supabase
+        .from("dentists")
+        .select("*")
+        .order("name", { ascending: true });
+      if (dentistError) {
+        setLoadError(dentistError.message);
+      } else {
+        setDentists(dentistData ?? []);
+      }
+
+      const { data: staffData, error: staffError } = await supabase
+        .from("staff")
+        .select("*")
+        .order("name", { ascending: true });
+      if (staffError) {
+        setLoadError(staffError.message);
+      } else {
+        setStaff(staffData ?? []);
       }
 
       setIsLoading(false);
@@ -409,6 +434,11 @@ export default function Home() {
       .from("communications")
       .insert({
         date: formData.date,
+        patient_name: formatFullName(
+          formData.patientFirstName.trim(),
+          formData.patientMiddleName.trim() || null,
+          formData.patientLastName.trim(),
+        ),
         patient_first_name: formData.patientFirstName.trim(),
         patient_middle_name: formData.patientMiddleName.trim() || null,
         patient_last_name: formData.patientLastName.trim(),
@@ -469,6 +499,42 @@ export default function Home() {
     await saveActivity(activityModalForm, {
       closeModal: true,
     });
+  };
+
+  const addDentist = async (name: string) => {
+    if (!isSupabaseConfigured) {
+      showToast("error", "Supabase is not configured yet.");
+      return;
+    }
+    const { data, error } = await supabase
+      .from("dentists")
+      .insert({ name })
+      .select()
+      .single();
+    if (error) {
+      showToast("error", error.message);
+      return;
+    }
+    setDentists((prev) => [...prev, data].sort((a, b) => a.name.localeCompare(b.name)));
+    showToast("success", "Dentist added.");
+  };
+
+  const addStaff = async (name: string) => {
+    if (!isSupabaseConfigured) {
+      showToast("error", "Supabase is not configured yet.");
+      return;
+    }
+    const { data, error } = await supabase
+      .from("staff")
+      .insert({ name })
+      .select()
+      .single();
+    if (error) {
+      showToast("error", error.message);
+      return;
+    }
+    setStaff((prev) => [...prev, data].sort((a, b) => a.name.localeCompare(b.name)));
+    showToast("success", "Staff added.");
   };
 
   const statusCounts = useMemo(() => {
@@ -563,6 +629,8 @@ export default function Home() {
             communications={communications}
             events={events}
             isLoading={isLoading}
+            dentists={dentists}
+            staff={staff}
           />
         )}
 
@@ -572,6 +640,15 @@ export default function Home() {
             statusCounts={statusCounts}
             maxStatusCount={maxStatusCount}
             upcomingEvents={upcomingEvents}
+          />
+        )}
+
+        {activeTab === "admin" && (
+          <AdminSection
+            dentists={dentists}
+            staff={staff}
+            onAddDentist={addDentist}
+            onAddStaff={addStaff}
           />
         )}
       </div>
@@ -598,6 +675,8 @@ export default function Home() {
           setSelectedDate(null);
         }}
         onSubmit={handleActivityModalSubmit}
+        dentists={dentists}
+        staff={staff}
       />
 
       <AppointmentsListModal
