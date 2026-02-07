@@ -333,8 +333,8 @@ export function ActivitiesSection({
             </p>
           )}
           {communications.length > 0 && (
-            <div className="relative pl-8">
-              <div className="absolute left-3 top-0 h-full w-px bg-zinc-200" />
+            <div className="relative pl-6">
+              <div className="absolute left-[9px] top-0 h-full w-px bg-zinc-200" />
               <div className="space-y-4">
                 {communications.slice(0, 6).map((entry) => {
                   const linkedEvent = events.find(
@@ -347,7 +347,7 @@ export function ActivitiesSection({
                       onClick={() => onOpenDetails(entry)}
                       className="relative w-full text-left text-sm"
                     >
-                      <div className="absolute left-[-14px] top-1 h-2.5 w-2.5 rounded-full bg-[color:var(--primary)]" />
+                      <div className="absolute left-[-19px] top-1 h-2.5 w-2.5 rounded-full border-2 border-[color:var(--primary)] bg-white" />
                       <div className="flex items-center justify-between text-xs text-[color:var(--foreground)]/60">
                         <span>{formatReadableDate(entry.date)}</span>
                         {linkedEvent && (
