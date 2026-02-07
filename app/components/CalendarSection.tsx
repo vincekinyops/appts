@@ -15,6 +15,7 @@ type CalendarSectionProps = {
     anchorRect: DOMRect,
   ) => void;
   selectedDate: string | null;
+  todayIso: string;
   toIsoDate: (date: Date) => string;
 };
 
@@ -28,6 +29,7 @@ export function CalendarSection({
   onEditEvent,
   onViewDayAppointments,
   selectedDate,
+  todayIso,
   toIsoDate,
 }: CalendarSectionProps) {
   return (
@@ -89,21 +91,46 @@ export function CalendarSection({
             }
             const isoDate = toIsoDate(dateValue);
             const dayEvents = eventsByDate.get(isoDate) ?? [];
+          const isPastDay = isoDate < todayIso;
             const isSelected = selectedDate === isoDate;
             return (
               <div
                 key={isoDate}
                 role="button"
                 tabIndex={0}
-                onClick={() => onOpenDate(isoDate)}
+              onClick={(event) => {
+                if (isPastDay) {
+                  if (dayEvents.length > 0) {
+                    const rect = (
+                      event.currentTarget as HTMLElement
+                    ).getBoundingClientRect();
+                    onViewDayAppointments(isoDate, dayEvents, rect);
+                  }
+                  return;
+                }
+                onOpenDate(isoDate);
+              }}
                 onKeyDown={(event) => {
                   if (event.key === "Enter" || event.key === " ") {
-                    onOpenDate(isoDate);
+                  if (isPastDay) {
+                    if (dayEvents.length > 0) {
+                      const rect = (
+                        event.currentTarget as HTMLElement
+                      ).getBoundingClientRect();
+                      onViewDayAppointments(isoDate, dayEvents, rect);
+                    }
+                    return;
+                  }
+                  onOpenDate(isoDate);
                   }
                 }}
-                className={`flex h-24 flex-col p-2 text-left transition hover:bg-[color:var(--background)] ${
-                  isSelected ? "bg-[#fff1e6]" : "bg-white"
-                }`}
+              className={`flex h-24 flex-col p-2 text-left transition hover:bg-[color:var(--background)] ${
+                isSelected ? "bg-[#fff1e6]" : "bg-white"
+              } ${
+                isPastDay
+                  ? "bg-zinc-100 text-[color:var(--foreground)]/40"
+                  : "text-[color:var(--foreground)]"
+              }`}
               >
               <div className="flex items-center justify-between text-xs font-semibold text-[color:var(--foreground)]">
                 <span>{dateValue.getDate()}</span>
@@ -143,6 +170,13 @@ export function CalendarSection({
                       key={event.id}
                       onClick={(clickEvent) => {
                         clickEvent.stopPropagation();
+                        if (isPastDay) {
+                          const rect = (
+                            clickEvent.currentTarget as HTMLElement
+                          ).getBoundingClientRect();
+                          onViewDayAppointments(isoDate, dayEvents, rect);
+                          return;
+                        }
                         onEditEvent(event);
                       }}
                     className="flex items-center gap-2 bg-[color:var(--background)] px-2 py-0.5 text-[10px] text-[color:var(--foreground)]"

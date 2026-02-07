@@ -2,6 +2,7 @@ create extension if not exists "pgcrypto";
 
 create table if not exists public.calendar_events (
   id uuid primary key default gen_random_uuid(),
+  event_type text not null default 'appointment',
   title text not null,
   date date not null,
   time text,

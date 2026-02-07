@@ -22,6 +22,7 @@ import type {
   ActivityForm,
   AppointmentForm,
   AppointmentStatus,
+  AppointmentType,
   CalendarEvent,
   CommunicationEntry,
   Dentist,
@@ -41,6 +42,7 @@ export default function Home() {
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
   const [eventForm, setEventForm] = useState<AppointmentForm>({
+    type: "appointment",
     title: "",
     date: toIsoDate(new Date()),
     time: "",
@@ -179,6 +181,7 @@ export default function Home() {
             ...event,
             status,
             color: event.color ?? statusColors[status],
+            event_type: (event.event_type ?? "appointment") as AppointmentType,
           };
         });
         setEvents(normalizedEvents);
@@ -237,9 +240,14 @@ export default function Home() {
   });
 
   const openEventModal = (dateValue: string) => {
+    if (dateValue < toIsoDate(new Date())) {
+      showToast("error", "Past dates are view-only.");
+      return;
+    }
     setSelectedDate(dateValue);
     setSelectedEventId(null);
     setEventForm({
+      type: "appointment",
       title: "",
       date: dateValue,
       time: "",
@@ -253,9 +261,14 @@ export default function Home() {
   };
 
   const openEditEventModal = (event: CalendarEvent) => {
+    if (event.date < toIsoDate(new Date())) {
+      showToast("error", "Past dates are view-only.");
+      return;
+    }
     setSelectedDate(event.date);
     setSelectedEventId(event.id);
     setEventForm({
+      type: event.event_type ?? "appointment",
       title: event.title,
       date: event.date,
       time: event.time ?? "",
@@ -311,6 +324,7 @@ export default function Home() {
     }
     const statusColor = statusColors[eventForm.status];
     const payload = {
+      event_type: eventForm.type,
       title: eventForm.title.trim(),
       date: eventForm.date,
       time: eventForm.time.trim() || null,
@@ -615,6 +629,7 @@ export default function Home() {
             onEditEvent={openEditEventModal}
             onViewDayAppointments={openAppointmentsListModal}
             selectedDate={selectedDate}
+            todayIso={toIsoDate(new Date())}
             toIsoDate={toIsoDate}
           />
         )}

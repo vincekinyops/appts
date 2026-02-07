@@ -1,6 +1,7 @@
 import type {
   AppointmentForm,
   AppointmentStatus,
+  AppointmentType,
   PreviousPatient,
 } from "@/app/lib/types";
 import { statusOptions } from "@/app/lib/constants";
@@ -35,7 +36,9 @@ export function AppointmentModal({
         <div className="flex items-start justify-between">
           <div>
             <h3 className="text-lg font-semibold">
-              {selectedEventId ? "Edit Appointment" : "New Appointment"}
+              {selectedEventId
+                ? `Edit ${form.type === "event" ? "Event" : "Appointment"}`
+                : `New ${form.type === "event" ? "Event" : "Appointment"}`}
             </h3>
             <p className="text-sm text-zinc-500">
               {formatReadableDate(form.date)}
@@ -63,6 +66,27 @@ export function AppointmentModal({
         </div>
 
         <div className="mt-4 grid gap-4">
+          <div className="flex w-fit rounded-md border border-zinc-200 p-1 text-xs font-semibold">
+            {(["event", "appointment"] as AppointmentType[]).map((type) => (
+              <button
+                key={type}
+                type="button"
+                onClick={() =>
+                  onFormChange((prev) => ({
+                    ...prev,
+                    type,
+                  }))
+                }
+                className={`rounded-md px-3 py-1 transition ${
+                  form.type === type
+                    ? "bg-[color:var(--primary)] text-white"
+                    : "text-[color:var(--foreground)]/70 hover:bg-[color:var(--background)]"
+                }`}
+              >
+                {type === "event" ? "Event" : "Appointment"}
+              </button>
+            ))}
+          </div>
           <label className="grid gap-2 text-sm font-medium text-zinc-700">
             <span>
               Title <span className="text-red-600">*</span>
@@ -78,7 +102,7 @@ export function AppointmentModal({
               }
               required
             className="rounded-md border border-zinc-200 px-3 py-2 text-sm"
-              placeholder="Appointment name"
+              placeholder={form.type === "event" ? "Event title" : "Appointment name"}
             />
           </label>
           <div className="grid gap-4 sm:grid-cols-2">
@@ -126,6 +150,7 @@ export function AppointmentModal({
                     date: event.target.value,
                   }))
                 }
+                min={new Date().toISOString().split("T")[0]}
                 className="rounded-md border border-zinc-200 px-3 py-2 text-sm"
               />
             </label>

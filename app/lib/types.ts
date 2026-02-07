@@ -2,6 +2,7 @@ export type AppointmentStatus = "pending" | "today" | "cancelled" | "done";
 
 export type CalendarEvent = {
   id: string;
+  event_type: AppointmentType;
   title: string;
   date: string;
   time: string | null;
@@ -44,7 +45,10 @@ export type AppointmentOption = {
   event: CalendarEvent;
 };
 
+export type AppointmentType = "event" | "appointment";
+
 export type AppointmentForm = {
+  type: AppointmentType;
   title: string;
   date: string;
   time: string;
