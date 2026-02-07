@@ -55,7 +55,7 @@ export function ActivitiesSection({
 
         <form className="activities-form mt-6 grid gap-4" onSubmit={onSubmit}>
           <div className="grid gap-4 lg:grid-cols-2 lg:auto-rows-min">
-            <label className="grid gap-2 text-sm font-medium text-zinc-700 lg:col-start-1 lg:row-start-1">
+            <label className="grid content-start gap-1 text-sm font-medium text-zinc-700 lg:col-start-1 lg:row-start-1">
               Previous Patient
               <select
                 value=""
@@ -88,7 +88,7 @@ export function ActivitiesSection({
                 ))}
               </select>
             </label>
-            <label className="grid gap-2 text-sm font-medium text-zinc-700 lg:col-start-2 lg:row-start-1">
+            <label className="grid content-start gap-1 text-sm font-medium text-zinc-700 lg:col-start-2 lg:row-start-1">
               Current Dentist
               <select
                 value={form.currentDentist}
@@ -109,7 +109,7 @@ export function ActivitiesSection({
               </select>
             </label>
 
-            <label className="grid gap-2 text-sm font-medium text-zinc-700 lg:col-start-1 lg:row-start-2">
+            <label className="grid content-start gap-1 text-sm font-medium text-zinc-700 lg:col-start-1 lg:row-start-2">
               <span>
                 Date <span className="text-red-600">*</span>
               </span>
@@ -126,7 +126,7 @@ export function ActivitiesSection({
                 className="rounded-md border border-zinc-200 px-3 py-2 text-sm"
               />
             </label>
-            <label className="grid gap-2 text-sm font-medium text-zinc-700 lg:col-start-2 lg:row-start-2">
+            <label className="grid content-start gap-1 text-sm font-medium text-zinc-700 lg:col-start-2 lg:row-start-2">
               <span>
                 Created By <span className="text-red-600">*</span>
               </span>
@@ -151,7 +151,7 @@ export function ActivitiesSection({
             </label>
 
             <div className="grid gap-4 sm:grid-cols-3 lg:col-start-1 lg:row-start-3">
-              <label className="grid gap-2 text-sm font-medium text-zinc-700">
+              <label className="grid content-start gap-1 text-sm font-medium text-zinc-700">
                 <span>
                   First Name <span className="text-red-600">*</span>
                 </span>
@@ -168,7 +168,7 @@ export function ActivitiesSection({
                   className="w-full rounded-md border border-zinc-200 px-3 py-2 text-sm"
                 />
               </label>
-              <label className="grid gap-2 text-sm font-medium text-zinc-700">
+              <label className="grid content-start gap-1 text-sm font-medium text-zinc-700">
                 Middle Name
                 <input
                   type="text"
@@ -182,7 +182,7 @@ export function ActivitiesSection({
                   className="w-full rounded-md border border-zinc-200 px-3 py-2 text-sm"
                 />
               </label>
-              <label className="grid gap-2 text-sm font-medium text-zinc-700">
+              <label className="grid content-start gap-1 text-sm font-medium text-zinc-700">
                 <span>
                   Last Name <span className="text-red-600">*</span>
                 </span>
@@ -200,7 +200,7 @@ export function ActivitiesSection({
                 />
               </label>
             </div>
-            <label className="grid gap-2 text-sm font-medium text-zinc-700 lg:col-start-2 lg:row-start-3">
+            <label className="grid content-start gap-1 text-sm font-medium text-zinc-700 lg:col-start-2 lg:row-start-3">
               Date Called
               <input
                 type="date"
@@ -216,7 +216,7 @@ export function ActivitiesSection({
               />
             </label>
 
-            <label className="grid gap-2 text-sm font-medium text-zinc-700 lg:col-start-1 lg:row-start-4">
+            <label className="grid content-start gap-1 text-sm font-medium text-zinc-700 lg:col-start-1 lg:row-start-4">
               <span>
                 School Year <span className="text-red-600">*</span>
               </span>
@@ -245,7 +245,7 @@ export function ActivitiesSection({
                 )}
               </select>
             </label>
-            <label className="grid gap-2 text-sm font-medium text-zinc-700 lg:col-start-2 lg:row-start-4">
+            <label className="grid content-start gap-1 text-sm font-medium text-zinc-700 lg:col-start-2 lg:row-start-4">
               Date Emailed
               <input
                 type="date"
@@ -261,7 +261,7 @@ export function ActivitiesSection({
               />
             </label>
 
-            <label className="grid gap-2 text-sm font-medium text-zinc-700 lg:col-start-1 lg:row-start-5">
+            <label className="grid content-start gap-1 text-sm font-medium text-zinc-700 lg:col-start-1 lg:row-start-5">
               Language
               <input
                 type="text"
@@ -276,7 +276,7 @@ export function ActivitiesSection({
               />
             </label>
 
-            <label className="grid gap-2 text-sm font-medium text-zinc-700 lg:col-start-1 lg:row-start-6">
+            <label className="grid content-start gap-1 text-sm font-medium text-zinc-700 lg:col-start-1 lg:row-start-6">
               Referral Type
               <select
                 value={form.referralType}
@@ -296,7 +296,7 @@ export function ActivitiesSection({
               </select>
             </label>
 
-            <label className="grid gap-2 text-sm font-medium text-zinc-700 lg:col-start-2 lg:row-start-5 lg:row-span-2">
+            <label className="grid content-start gap-1 text-sm font-medium text-zinc-700 lg:col-start-2 lg:row-start-5 lg:row-span-2">
               Notes
               <textarea
                 value={form.notes}
