@@ -703,8 +703,8 @@ export default function Home() {
   }, [events]);
 
   return (
-    <div className="min-h-screen bg-[var(--background)] px-6 py-10 text-[var(--foreground)]">
-      <div className="mx-auto flex w-full max-w-6xl flex-col gap-8">
+    <div className="flex min-h-screen flex-col bg-[var(--background)] px-6 py-10 text-[var(--foreground)]">
+      <div className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-8">
         <Header
           title="Calendar, Activities, and Insights"
           subtitle="Track appointments, log patient activities, and review trends in one place."

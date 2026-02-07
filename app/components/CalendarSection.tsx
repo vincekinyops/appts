@@ -33,7 +33,7 @@ export function CalendarSection({
   toIsoDate,
 }: CalendarSectionProps) {
   return (
-    <section className="rounded-md border border-zinc-200 bg-white p-6 shadow-sm">
+    <section className="flex flex-1 flex-col rounded-md border border-zinc-200 bg-white p-6 shadow-sm">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <h2 className="text-xl font-semibold">{monthLabel}</h2>
@@ -69,7 +69,7 @@ export function CalendarSection({
           </div>
         ))}
       </div>
-      <div className="mt-3 grid grid-cols-7 gap-px rounded-md border border-zinc-200 bg-zinc-200">
+      <div className="mt-3 grid flex-1 auto-rows-fr grid-cols-7 gap-px rounded-md border border-zinc-200 bg-zinc-200">
         {calendarCells
           .reduce<Array<Array<Date | null>>>((weeks, cell, index) => {
             if (index % 7 === 0) {
@@ -85,7 +85,7 @@ export function CalendarSection({
               return (
               <div
                 key={`empty-${index}`}
-                className="h-24 bg-white"
+                className="min-h-20 bg-white"
               />
               );
             }
@@ -124,7 +124,7 @@ export function CalendarSection({
                   onOpenDate(isoDate);
                   }
                 }}
-              className={`flex h-24 flex-col p-2 text-left transition hover:bg-[color:var(--background)] ${
+              className={`flex min-h-20 flex-col p-2 text-left transition hover:bg-[color:var(--background)] ${
                 isSelected ? "bg-[#fff1e6]" : "bg-white"
               } ${
                 isPastDay
