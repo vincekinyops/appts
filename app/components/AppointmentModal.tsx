@@ -15,6 +15,7 @@ type AppointmentModalProps = {
   onClose: () => void;
   onSave: () => void;
   previousPatients: PreviousPatient[];
+  isDateLocked: boolean;
 };
 
 export function AppointmentModal({
@@ -25,6 +26,7 @@ export function AppointmentModal({
   onClose,
   onSave,
   previousPatients,
+  isDateLocked,
 }: AppointmentModalProps) {
   if (!isOpen) {
     return null;
@@ -65,7 +67,7 @@ export function AppointmentModal({
           </button>
         </div>
 
-        <div className="mt-4 grid gap-4">
+          <div className="mt-4 grid gap-4">
           <div className="flex w-fit rounded-md border border-zinc-200 p-1 text-xs font-semibold">
             {(["event", "appointment"] as AppointmentType[]).map((type) => (
               <button
@@ -75,6 +77,9 @@ export function AppointmentModal({
                   onFormChange((prev) => ({
                     ...prev,
                     type,
+                      patientFirstName: type === "event" ? "" : prev.patientFirstName,
+                      patientMiddleName: type === "event" ? "" : prev.patientMiddleName,
+                      patientLastName: type === "event" ? "" : prev.patientLastName,
                   }))
                 }
                 className={`rounded-md px-3 py-1 transition ${
@@ -106,54 +111,58 @@ export function AppointmentModal({
             />
           </label>
           <div className="grid gap-4 sm:grid-cols-2">
-            <label className="grid gap-2 text-sm font-medium text-zinc-700 sm:col-span-2">
-              Previous Patient
-              <select
-                value=""
-                onChange={(event) => {
-                  const [first, middle, last] = event.target.value.split("|");
-                  if (!first || !last) {
-                    return;
+            {form.type === "appointment" && (
+              <label className="grid gap-2 text-sm font-medium text-zinc-700 sm:col-span-2">
+                Previous Patient
+                <select
+                  value=""
+                  onChange={(event) => {
+                    const [first, middle, last] = event.target.value.split("|");
+                    if (!first || !last) {
+                      return;
+                    }
+                    onFormChange((prev) => ({
+                      ...prev,
+                      patientFirstName: first,
+                      patientMiddleName: middle || "",
+                      patientLastName: last,
+                    }));
+                  }}
+                  className="rounded-md border border-zinc-200 px-3 py-2 pr-10 text-sm"
+                >
+                  <option value="">Select a previous patient</option>
+                  {previousPatients.map((patient) => (
+                    <option
+                      key={`${patient.first}-${patient.middle}-${patient.last}`}
+                      value={`${patient.first}|${patient.middle}|${patient.last}`}
+                    >
+                      {formatFullName(
+                        patient.first,
+                        patient.middle,
+                        patient.last,
+                      )}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            )}
+            {!isDateLocked && (
+              <label className="grid gap-2 text-sm font-medium text-zinc-700">
+                Date
+                <input
+                  type="date"
+                  value={form.date}
+                  onChange={(event) =>
+                    onFormChange((prev) => ({
+                      ...prev,
+                      date: event.target.value,
+                    }))
                   }
-                  onFormChange((prev) => ({
-                    ...prev,
-                    patientFirstName: first,
-                    patientMiddleName: middle || "",
-                    patientLastName: last,
-                  }));
-                }}
-                className="rounded-md border border-zinc-200 px-3 py-2 pr-10 text-sm"
-              >
-                <option value="">Select a previous patient</option>
-                {previousPatients.map((patient) => (
-                  <option
-                    key={`${patient.first}-${patient.middle}-${patient.last}`}
-                    value={`${patient.first}|${patient.middle}|${patient.last}`}
-                  >
-                    {formatFullName(
-                      patient.first,
-                      patient.middle,
-                      patient.last,
-                    )}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label className="grid gap-2 text-sm font-medium text-zinc-700">
-              Date
-              <input
-                type="date"
-                value={form.date}
-                onChange={(event) =>
-                  onFormChange((prev) => ({
-                    ...prev,
-                    date: event.target.value,
-                  }))
-                }
-                min={new Date().toISOString().split("T")[0]}
-                className="rounded-md border border-zinc-200 px-3 py-2 text-sm"
-              />
-            </label>
+                  min={new Date().toISOString().split("T")[0]}
+                  className="rounded-md border border-zinc-200 px-3 py-2 text-sm"
+                />
+              </label>
+            )}
             <label className="grid gap-2 text-sm font-medium text-zinc-700">
               Time
               <input
@@ -168,56 +177,58 @@ export function AppointmentModal({
                 className="rounded-md border border-zinc-200 px-3 py-2 text-sm"
               />
             </label>
-            <div className="grid gap-4 sm:col-span-2 sm:grid-cols-3">
-              <label className="grid min-w-0 gap-2 text-sm font-medium text-zinc-700">
-                <span>
-                  First Name <span className="text-red-600">*</span>
-                </span>
-                <input
-                  type="text"
-                  value={form.patientFirstName}
-                  onChange={(event) =>
-                    onFormChange((prev) => ({
-                      ...prev,
-                      patientFirstName: event.target.value,
-                    }))
-                  }
-                  required
-                  className="w-full rounded-md border border-zinc-200 px-3 py-2 text-sm"
-                />
-              </label>
-              <label className="grid min-w-0 gap-2 text-sm font-medium text-zinc-700">
-                Middle Name
-                <input
-                  type="text"
-                  value={form.patientMiddleName}
-                  onChange={(event) =>
-                    onFormChange((prev) => ({
-                      ...prev,
-                      patientMiddleName: event.target.value,
-                    }))
-                  }
-                  className="w-full rounded-md border border-zinc-200 px-3 py-2 text-sm"
-                />
-              </label>
-              <label className="grid min-w-0 gap-2 text-sm font-medium text-zinc-700">
-                <span>
-                  Last Name <span className="text-red-600">*</span>
-                </span>
-                <input
-                  type="text"
-                  value={form.patientLastName}
-                  onChange={(event) =>
-                    onFormChange((prev) => ({
-                      ...prev,
-                      patientLastName: event.target.value,
-                    }))
-                  }
-                  required
-                  className="w-full rounded-md border border-zinc-200 px-3 py-2 text-sm"
-                />
-              </label>
-            </div>
+            {form.type === "appointment" && (
+              <div className="grid gap-4 sm:col-span-2 sm:grid-cols-3">
+                <label className="grid min-w-0 gap-2 text-sm font-medium text-zinc-700">
+                  <span>
+                    First Name <span className="text-red-600">*</span>
+                  </span>
+                  <input
+                    type="text"
+                    value={form.patientFirstName}
+                    onChange={(event) =>
+                      onFormChange((prev) => ({
+                        ...prev,
+                        patientFirstName: event.target.value,
+                      }))
+                    }
+                    required
+                    className="w-full rounded-md border border-zinc-200 px-3 py-2 text-sm"
+                  />
+                </label>
+                <label className="grid min-w-0 gap-2 text-sm font-medium text-zinc-700">
+                  Middle Name
+                  <input
+                    type="text"
+                    value={form.patientMiddleName}
+                    onChange={(event) =>
+                      onFormChange((prev) => ({
+                        ...prev,
+                        patientMiddleName: event.target.value,
+                      }))
+                    }
+                    className="w-full rounded-md border border-zinc-200 px-3 py-2 text-sm"
+                  />
+                </label>
+                <label className="grid min-w-0 gap-2 text-sm font-medium text-zinc-700">
+                  <span>
+                    Last Name <span className="text-red-600">*</span>
+                  </span>
+                  <input
+                    type="text"
+                    value={form.patientLastName}
+                    onChange={(event) =>
+                      onFormChange((prev) => ({
+                        ...prev,
+                        patientLastName: event.target.value,
+                      }))
+                    }
+                    required
+                    className="w-full rounded-md border border-zinc-200 px-3 py-2 text-sm"
+                  />
+                </label>
+              </div>
+            )}
             <label className="grid gap-2 text-sm font-medium text-zinc-700">
               Status
               <select
@@ -257,7 +268,7 @@ export function AppointmentModal({
             onClick={onSave}
             className="rounded-md bg-[color:var(--primary)] px-4 py-2 text-sm font-semibold text-white transition hover:opacity-90"
           >
-            Save Appointment
+            {form.type === "event" ? "Save Event" : "Save Appointment"}
           </button>
         </div>
       </div>

@@ -3,6 +3,7 @@
 import { type FormEvent, useEffect, useMemo, useState } from "react";
 import { isSupabaseConfigured, supabase } from "@/lib/supabaseClient";
 import { ActivityModal } from "@/app/components/ActivityModal";
+import { ActivityDetailsModal } from "@/app/components/ActivityDetailsModal";
 import { ActivitiesSection } from "@/app/components/ActivitiesSection";
 import { AdminSection } from "@/app/components/AdminSection";
 import { AppointmentModal } from "@/app/components/AppointmentModal";
@@ -32,7 +33,7 @@ import type {
 export default function Home() {
   const [activeTab, setActiveTab] = useState<
     "calendar" | "activities" | "dashboard" | "admin"
-  >("calendar");
+  >("dashboard");
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [communications, setCommunications] = useState<CommunicationEntry[]>([]);
   const [currentMonth, setCurrentMonth] = useState(
@@ -73,6 +74,9 @@ export default function Home() {
     items: CalendarEvent[];
     anchorRect: DOMRect | null;
   }>({ date: null, items: [], anchorRect: null });
+  const [activityDetails, setActivityDetails] =
+    useState<CommunicationEntry | null>(null);
+  const [editingActivityId, setEditingActivityId] = useState<string | null>(null);
   const [dentists, setDentists] = useState<Dentist[]>([]);
   const [staff, setStaff] = useState<StaffMember[]>([]);
   const [activityModalForm, setActivityModalForm] = useState<ActivityForm>({
@@ -310,12 +314,15 @@ export default function Home() {
   };
 
   const handleSaveEvent = async () => {
+    if (!eventForm.title.trim()) {
+      showToast("error", "Add a title.");
+      return;
+    }
     if (
-      !eventForm.title.trim() ||
-      !eventForm.patientFirstName.trim() ||
-      !eventForm.patientLastName.trim()
+      eventForm.type === "appointment" &&
+      (!eventForm.patientFirstName.trim() || !eventForm.patientLastName.trim())
     ) {
-      showToast("error", "Add a title and patient first/last name.");
+      showToast("error", "Add patient first and last name.");
       return;
     }
     if (!isSupabaseConfigured) {
@@ -351,7 +358,10 @@ export default function Home() {
         prev.map((event) => (event.id === data.id ? data : event)),
       );
       setIsEventModalOpen(false);
-      showToast("success", "Appointment updated.");
+      showToast(
+        "success",
+        eventForm.type === "event" ? "Event updated." : "Appointment updated.",
+      );
       const hasActivity = communications.some(
         (entry) => entry.appointment_id === data.id,
       );
@@ -372,7 +382,10 @@ export default function Home() {
     }
     setEvents((prev) => [...prev, data]);
     setIsEventModalOpen(false);
-    showToast("success", "Appointment saved.");
+    showToast(
+      "success",
+      eventForm.type === "event" ? "Event saved." : "Appointment saved.",
+    );
     if (data.status === "done") {
       openActivityModalFromEvent(data);
     }
@@ -424,19 +437,27 @@ export default function Home() {
       appointmentId = newEvent.id;
       setEvents((prev) => [...prev, newEvent]);
     } else {
-      const { data: updatedEvent, error: updatedEventError } = await supabase
+      const { data: updatedEvents, error: updatedEventError } = await supabase
         .from("calendar_events")
         .update({
           status: "done",
           color: statusColors.done,
         })
         .eq("id", appointmentId)
-        .select()
-        .single();
+        .select();
       if (updatedEventError) {
         showToast("error", updatedEventError.message);
         return;
       }
+      if (!updatedEvents || updatedEvents.length === 0) {
+        showToast("error", "Appointment update failed. Record not found.");
+        return;
+      }
+      if (updatedEvents.length > 1) {
+        showToast("error", "Appointment update failed. Multiple records updated.");
+        return;
+      }
+      const updatedEvent = updatedEvents[0];
       setEvents((prev) =>
         prev.map((event) =>
           event.id === updatedEvent.id ? updatedEvent : event,
@@ -444,35 +465,63 @@ export default function Home() {
       );
     }
 
-    const { data, error } = await supabase
-      .from("communications")
-      .insert({
-        date: formData.date,
-        patient_name: formatFullName(
-          formData.patientFirstName.trim(),
-          formData.patientMiddleName.trim() || null,
-          formData.patientLastName.trim(),
-        ),
-        patient_first_name: formData.patientFirstName.trim(),
-        patient_middle_name: formData.patientMiddleName.trim() || null,
-        patient_last_name: formData.patientLastName.trim(),
-        school_year: formData.schoolYear.trim(),
-        current_dentist: formData.currentDentist.trim(),
-        language: formData.language.trim(),
-        date_called: formData.dateCalled || null,
-        date_emailed: formData.dateEmailed || null,
-        referral_type: formData.referralType,
-        notes: formData.notes.trim() || null,
-        created_by: formData.createdBy.trim(),
-        appointment_id: appointmentId,
-      })
-      .select()
-      .single();
-    if (error) {
-      showToast("error", error.message);
-      return;
+    const payload = {
+      date: formData.date,
+      patient_name: formatFullName(
+        formData.patientFirstName.trim(),
+        formData.patientMiddleName.trim() || null,
+        formData.patientLastName.trim(),
+      ),
+      patient_first_name: formData.patientFirstName.trim(),
+      patient_middle_name: formData.patientMiddleName.trim() || null,
+      patient_last_name: formData.patientLastName.trim(),
+      school_year: formData.schoolYear.trim(),
+      current_dentist: formData.currentDentist.trim(),
+      language: formData.language.trim(),
+      date_called: formData.dateCalled || null,
+      date_emailed: formData.dateEmailed || null,
+      referral_type: formData.referralType,
+      notes: formData.notes.trim() || null,
+      created_by: formData.createdBy.trim(),
+      appointment_id: appointmentId,
+    };
+
+    if (editingActivityId) {
+      const { data, error } = await supabase
+        .from("communications")
+        .update(payload)
+        .eq("id", editingActivityId)
+        .select();
+      if (error) {
+        showToast("error", error.message);
+        return;
+      }
+      if (!data || data.length === 0) {
+        showToast("error", "Activity update failed. Record not found.");
+        return;
+      }
+      if (data.length > 1) {
+        showToast("error", "Activity update failed. Multiple records updated.");
+        return;
+      }
+      setCommunications((prev) =>
+        prev.map((entry) => (entry.id === data[0].id ? data[0] : entry)),
+      );
+      setEditingActivityId(null);
+      showToast("success", "Activity updated.");
+    } else {
+      const { data, error } = await supabase
+        .from("communications")
+        .insert(payload)
+        .select()
+        .single();
+      if (error) {
+        showToast("error", error.message);
+        return;
+      }
+      setCommunications((prev) => [data, ...prev]);
+      showToast("success", "Activity saved.");
     }
-    setCommunications((prev) => [data, ...prev]);
     if (options?.resetForm) {
       setCommunicationForm({
         date: toIsoDate(new Date()),
@@ -494,7 +543,27 @@ export default function Home() {
       setIsActivityModalOpen(false);
     }
     setActiveTab("activities");
-    showToast("success", "Activity saved.");
+  };
+
+  const beginEditActivity = (entry: CommunicationEntry) => {
+    setActiveTab("activities");
+    setActivityDetails(null);
+    setEditingActivityId(entry.id);
+    setCommunicationForm({
+      date: entry.date,
+      patientFirstName: entry.patient_first_name,
+      patientMiddleName: entry.patient_middle_name ?? "",
+      patientLastName: entry.patient_last_name,
+      schoolYear: entry.school_year,
+      currentDentist: entry.current_dentist ?? "",
+      language: entry.language ?? "",
+      dateCalled: entry.date_called ?? "",
+      dateEmailed: entry.date_emailed ?? "",
+      referralType: entry.referral_type,
+      notes: entry.notes ?? "",
+      createdBy: entry.created_by,
+      appointmentId: entry.appointment_id ?? "",
+    });
   };
 
   const handleCommunicationSubmit = async (
@@ -550,22 +619,6 @@ export default function Home() {
     setStaff((prev) => [...prev, data].sort((a, b) => a.name.localeCompare(b.name)));
     showToast("success", "Staff added.");
   };
-
-  const statusCounts = useMemo(() => {
-    const counts = new Map<AppointmentStatus, number>();
-    events.forEach((event) => {
-      counts.set(event.status, (counts.get(event.status) ?? 0) + 1);
-    });
-    return statusOptions.map((option) => ({
-      status: option.value,
-      label: option.label,
-      count: counts.get(option.value) ?? 0,
-    }));
-  }, [events]);
-  const maxStatusCount = Math.max(
-    1,
-    ...statusCounts.map((item) => item.count),
-  );
 
   const upcomingEvents = useMemo(() => {
     const today = new Date();
@@ -646,14 +699,15 @@ export default function Home() {
             isLoading={isLoading}
             dentists={dentists}
             staff={staff}
+            isEditing={Boolean(editingActivityId)}
+            onOpenDetails={(entry) => setActivityDetails(entry)}
           />
         )}
 
         {activeTab === "dashboard" && (
           <DashboardSection
             communications={communications}
-            statusCounts={statusCounts}
-            maxStatusCount={maxStatusCount}
+            events={events}
             upcomingEvents={upcomingEvents}
           />
         )}
@@ -679,6 +733,7 @@ export default function Home() {
         }}
         onSave={handleSaveEvent}
         previousPatients={previousPatients}
+        isDateLocked={Boolean(selectedDate) && !selectedEventId}
       />
 
       <ActivityModal
@@ -692,6 +747,12 @@ export default function Home() {
         onSubmit={handleActivityModalSubmit}
         dentists={dentists}
         staff={staff}
+      />
+
+      <ActivityDetailsModal
+        entry={activityDetails}
+        onClose={() => setActivityDetails(null)}
+        onEdit={beginEditActivity}
       />
 
       <AppointmentsListModal

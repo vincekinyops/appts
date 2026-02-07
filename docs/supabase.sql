@@ -15,6 +15,9 @@ create table if not exists public.calendar_events (
   created_at timestamp with time zone default now()
 );
 
+alter table public.calendar_events
+  add column if not exists event_type text not null default 'appointment';
+
 create table if not exists public.communications (
   id uuid primary key default gen_random_uuid(),
   date date not null,
@@ -89,6 +92,23 @@ begin
     select 1
     from pg_policies
     where schemaname = 'public'
+      and tablename = 'calendar_events'
+      and policyname = 'Allow update access to calendar_events'
+  ) then
+    create policy "Allow update access to calendar_events"
+      on public.calendar_events
+      for update
+      using (true)
+      with check (true);
+  end if;
+end $$;
+
+do $$
+begin
+  if not exists (
+    select 1
+    from pg_policies
+    where schemaname = 'public'
       and tablename = 'communications'
       and policyname = 'Allow read access to communications'
   ) then
@@ -111,6 +131,23 @@ begin
     create policy "Allow insert access to communications"
       on public.communications
       for insert
+      with check (true);
+  end if;
+end $$;
+
+do $$
+begin
+  if not exists (
+    select 1
+    from pg_policies
+    where schemaname = 'public'
+      and tablename = 'communications'
+      and policyname = 'Allow update access to communications'
+  ) then
+    create policy "Allow update access to communications"
+      on public.communications
+      for update
+      using (true)
       with check (true);
   end if;
 end $$;

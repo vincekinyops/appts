@@ -21,9 +21,21 @@ export function Toast({ type, message, onClose }: ToastProps) {
       <button
         type="button"
         onClick={onClose}
-        className="rounded-md border border-transparent px-2 py-1 text-xs font-semibold hover:border-current"
+        className="rounded-md p-1 text-current/70 hover:bg-white/70"
+        aria-label="Close toast"
       >
-        Close
+        <svg
+          viewBox="0 0 24 24"
+          width="12"
+          height="12"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M6 6l12 12M18 6l-12 12" />
+        </svg>
       </button>
     </div>
   );

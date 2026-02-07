@@ -7,9 +7,9 @@ type TabsProps = {
 
 export function Tabs({ activeTab, onChange }: TabsProps) {
   const tabs: { id: TabId; label: string }[] = [
+    { id: "dashboard", label: "Dashboard" },
     { id: "calendar", label: "Calendar" },
     { id: "activities", label: "Activities" },
-    { id: "dashboard", label: "Dashboard" },
     { id: "admin", label: "Admin" },
   ];
 

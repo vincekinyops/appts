@@ -22,6 +22,8 @@ type ActivitiesSectionProps = {
   isLoading: boolean;
   dentists: Dentist[];
   staff: StaffMember[];
+  isEditing: boolean;
+  onOpenDetails: (entry: CommunicationEntry) => void;
 };
 
 export function ActivitiesSection({
@@ -35,6 +37,8 @@ export function ActivitiesSection({
   isLoading,
   dentists,
   staff,
+  isEditing,
+  onOpenDetails,
 }: ActivitiesSectionProps) {
   const createdByOptions = [
     ...staff.map((member) => ({ id: member.id, name: member.name })),
@@ -42,7 +46,7 @@ export function ActivitiesSection({
   ];
 
   return (
-    <section className="grid gap-6">
+    <section className="grid gap-6 lg:grid-cols-[3fr_1fr]">
       <div className="rounded-md border border-zinc-200 bg-white p-6 shadow-sm">
         <h2 className="text-xl font-semibold">Activities</h2>
         <p className="text-sm text-[color:var(--foreground)]/70">
@@ -207,6 +211,7 @@ export function ActivitiesSection({
                     dateCalled: event.target.value,
                   }))
                 }
+                max={new Date().toISOString().split("T")[0]}
                 className="rounded-md border border-zinc-200 px-3 py-2 text-sm"
               />
             </label>
@@ -251,6 +256,7 @@ export function ActivitiesSection({
                     dateEmailed: event.target.value,
                   }))
                 }
+                max={new Date().toISOString().split("T")[0]}
                 className="rounded-md border border-zinc-200 px-3 py-2 text-sm"
               />
             </label>
@@ -310,60 +316,68 @@ export function ActivitiesSection({
             type="submit"
             className="mt-2 rounded-md bg-[color:var(--primary)] px-4 py-2 text-sm font-semibold text-white transition hover:opacity-90"
           >
-            Save Activity
+            {isEditing ? "Update Activity" : "Save Activity"}
           </button>
         </form>
       </div>
 
-      <div className="rounded-md border border-zinc-200 bg-white p-6 shadow-sm">
+      <div>
         <div className="flex items-center justify-between">
           <h3 className="text-lg font-semibold">Recent Activities</h3>
           {isLoading && <span className="text-xs text-zinc-400">Loading...</span>}
         </div>
-        <div className="mt-4 space-y-3">
+        <div className="mt-4">
           {communications.length === 0 && !isLoading && (
             <p className="text-sm text-[color:var(--foreground)]/65">
               No activity entries yet.
             </p>
           )}
-          {communications.slice(0, 6).map((entry) => {
-            const linkedEvent = events.find(
-              (event) => event.id === entry.appointment_id,
-            );
-            return (
-              <div
-                key={entry.id}
-                className="rounded-md border border-zinc-200 bg-white/70 p-4 text-sm"
-              >
-                <div className="flex items-center justify-between">
-                  <span className="font-semibold text-[color:var(--foreground)]">
-                    {formatFullName(
-                      entry.patient_first_name,
-                      entry.patient_middle_name,
-                      entry.patient_last_name,
-                    )}
-                  </span>
-                  <span className="text-xs text-[color:var(--foreground)]/55">
-                    {formatReadableDate(entry.date)}
-                  </span>
-                </div>
-                <div className="mt-2 text-xs text-[color:var(--foreground)]/65">
-                  {entry.referral_type} • {entry.school_year} •{" "}
-                  {entry.language || "Language N/A"}
-                </div>
-                {linkedEvent && (
-                  <div className="mt-2 text-xs text-[color:var(--foreground)]/65">
-                    Appointment status: {linkedEvent.status}
-                  </div>
-                )}
-                {entry.notes && (
-                  <p className="mt-2 text-xs text-[color:var(--foreground)]/80">
-                    {entry.notes}
-                  </p>
-                )}
+          {communications.length > 0 && (
+            <div className="relative pl-8">
+              <div className="absolute left-3 top-0 h-full w-px bg-zinc-200" />
+              <div className="space-y-4">
+                {communications.slice(0, 6).map((entry) => {
+                  const linkedEvent = events.find(
+                    (event) => event.id === entry.appointment_id,
+                  );
+                  return (
+                    <button
+                      key={entry.id}
+                      type="button"
+                      onClick={() => onOpenDetails(entry)}
+                      className="relative w-full text-left text-sm"
+                    >
+                      <div className="absolute left-[-14px] top-1 h-2.5 w-2.5 rounded-full bg-[color:var(--primary)]" />
+                      <div className="flex items-center justify-between text-xs text-[color:var(--foreground)]/60">
+                        <span>{formatReadableDate(entry.date)}</span>
+                        {linkedEvent && (
+                          <span className="capitalize">{linkedEvent.status}</span>
+                        )}
+                      </div>
+                      <div className="mt-1 font-semibold text-[color:var(--foreground)]">
+                        {formatFullName(
+                          entry.patient_first_name,
+                          entry.patient_middle_name,
+                          entry.patient_last_name,
+                        )}
+                      </div>
+                      <div className="mt-1 text-xs text-[color:var(--foreground)]/70">
+                        {entry.current_dentist || "No dentist"} •{" "}
+                        {entry.referral_type}
+                      </div>
+                      <div className="mt-1 text-xs text-[color:var(--foreground)]/70">
+                        Called: {entry.date_called || "—"} • Emailed:{" "}
+                        {entry.date_emailed || "—"}
+                      </div>
+                      <div className="mt-1 text-xs text-[color:var(--foreground)]/70">
+                        Notes: {entry.notes || "—"}
+                      </div>
+                    </button>
+                  );
+                })}
               </div>
-            );
-          })}
+            </div>
+          )}
         </div>
       </div>
     </section>
