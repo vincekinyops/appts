@@ -8,7 +8,7 @@ import type {
   PreviousPatient,
   StaffMember,
 } from "@/app/lib/types";
-import { referralOptions } from "@/app/lib/constants";
+import { referralOptions, statusLabels } from "@/app/lib/constants";
 import { formatFullName, formatReadableDate } from "@/app/lib/formatters";
 
 type ActivitiesSectionProps = {
@@ -351,7 +351,7 @@ export function ActivitiesSection({
                       <div className="flex items-center justify-between text-xs text-[color:var(--foreground)]/60">
                         <span>{formatReadableDate(entry.date)}</span>
                         {linkedEvent && (
-                          <span className="capitalize">{linkedEvent.status}</span>
+                          <span>{statusLabels[linkedEvent.status]}</span>
                         )}
                       </div>
                       <div className="mt-1 font-semibold text-[color:var(--foreground)]">

@@ -47,7 +47,7 @@ export default function Home() {
     title: "",
     date: toIsoDate(new Date()),
     time: "",
-    status: "pending",
+    status: "confirmed",
     notes: "",
     patientFirstName: "",
     patientMiddleName: "",
@@ -100,6 +100,31 @@ export default function Home() {
   } | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+
+  const markNoShowForPastAppointments = async () => {
+    const todayIso = toIsoDate(new Date());
+    const { data, error } = await supabase
+      .from("calendar_events")
+      .update({ status: "no_show", color: statusColors.no_show })
+      .lt("date", todayIso)
+      .neq("status", "completed")
+      .neq("status", "no_show")
+      .or("event_type.eq.appointment,event_type.is.null")
+      .select();
+    if (error) {
+      setLoadError(error.message);
+      return;
+    }
+    if (!data || data.length === 0) {
+      return;
+    }
+    setEvents((prev) =>
+      prev.map((event) => {
+        const updated = data.find((row) => row.id === event.id);
+        return updated ? { ...event, ...updated } : event;
+      }),
+    );
+  };
 
   useEffect(() => {
     if (!toast) {
@@ -170,8 +195,31 @@ export default function Home() {
       return;
     }
 
+    const scheduleDailyNoShowUpdate = () => {
+      const now = new Date();
+      const nextRun = new Date();
+      nextRun.setHours(18, 0, 0, 0);
+      if (now >= nextRun) {
+        nextRun.setDate(nextRun.getDate() + 1);
+      }
+      const delay = nextRun.getTime() - now.getTime();
+      const timeoutId = window.setTimeout(() => {
+        markNoShowForPastAppointments();
+        const intervalId = window.setInterval(() => {
+          markNoShowForPastAppointments();
+        }, 1000 * 60 * 60 * 24);
+        scheduleHandle.intervalId = intervalId;
+      }, delay);
+      return timeoutId;
+    };
+
+    const scheduleHandle: { timeoutId: number | null; intervalId: number | null } =
+      { timeoutId: null, intervalId: null };
+    scheduleHandle.timeoutId = scheduleDailyNoShowUpdate();
+
     const loadData = async () => {
       setIsLoading(true);
+      await markNoShowForPastAppointments();
       const { data: eventData, error: eventError } = await supabase
         .from("calendar_events")
         .select("*")
@@ -180,7 +228,17 @@ export default function Home() {
         setLoadError(eventError.message);
       } else {
         const normalizedEvents = (eventData ?? []).map((event) => {
-          const status = (event.status ?? "pending") as AppointmentStatus;
+          const rawStatus = String(event.status ?? "confirmed");
+          const status =
+            rawStatus === "pending" || rawStatus === "coming"
+              ? "confirmed"
+              : rawStatus === "today"
+                ? "ongoing"
+                : rawStatus === "done"
+                  ? "completed"
+                  : rawStatus === "cancelled"
+                    ? "no_show"
+                    : (rawStatus as AppointmentStatus);
           return {
             ...event,
             status,
@@ -225,6 +283,14 @@ export default function Home() {
     };
 
     loadData();
+    return () => {
+      if (scheduleHandle.timeoutId !== null) {
+        window.clearTimeout(scheduleHandle.timeoutId);
+      }
+      if (scheduleHandle.intervalId !== null) {
+        window.clearInterval(scheduleHandle.intervalId);
+      }
+    };
   }, []);
 
   const monthLabel = currentMonth.toLocaleDateString(undefined, {
@@ -255,7 +321,7 @@ export default function Home() {
       title: "",
       date: dateValue,
       time: "",
-      status: "pending",
+      status: "confirmed",
       notes: "",
       patientFirstName: "",
       patientMiddleName: "",
@@ -365,7 +431,7 @@ export default function Home() {
       const hasActivity = communications.some(
         (entry) => entry.appointment_id === data.id,
       );
-      if (data.status === "done" && !hasActivity) {
+      if (data.status === "completed" && !hasActivity) {
         openActivityModalFromEvent(data);
       }
       return;
@@ -386,7 +452,7 @@ export default function Home() {
       "success",
       eventForm.type === "event" ? "Event saved." : "Appointment saved.",
     );
-    if (data.status === "done") {
+    if (data.status === "completed") {
       openActivityModalFromEvent(data);
     }
   };
@@ -421,8 +487,8 @@ export default function Home() {
           title: activityTitle,
           date: formData.date,
           time: null,
-          status: "done",
-          color: statusColors.done,
+          status: "completed",
+          color: statusColors.completed,
           notes: formData.notes.trim() || null,
           patient_first_name: formData.patientFirstName.trim(),
           patient_middle_name: formData.patientMiddleName.trim() || null,
@@ -440,8 +506,8 @@ export default function Home() {
       const { data: updatedEvents, error: updatedEventError } = await supabase
         .from("calendar_events")
         .update({
-          status: "done",
-          color: statusColors.done,
+          status: "completed",
+          color: statusColors.completed,
         })
         .eq("id", appointmentId)
         .select();

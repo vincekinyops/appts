@@ -2,6 +2,7 @@
 
 import { useMemo } from "react";
 import type { CalendarEvent } from "@/app/lib/types";
+import { statusColors, statusLabels } from "@/app/lib/constants";
 import { formatFullName, formatReadableDate, formatTime } from "@/app/lib/formatters";
 
 type AppointmentsListModalProps = {
@@ -106,8 +107,11 @@ export function AppointmentsListModal({
                 <div className="text-[11px] text-[color:var(--foreground)]/70">
                   {formatTime(event.time)}
                 </div>
-                <div className="mt-1 text-[11px] font-semibold text-[color:var(--primary)]">
-                  {event.status}
+                <div
+                  className="mt-1 text-[11px] font-semibold capitalize"
+                  style={{ color: statusColors[event.status] }}
+                >
+                  {statusLabels[event.status]}
                 </div>
               </div>
             </div>

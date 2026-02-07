@@ -1,4 +1,4 @@
-export type AppointmentStatus = "pending" | "today" | "cancelled" | "done";
+export type AppointmentStatus = "confirmed" | "ongoing" | "completed" | "no_show";
 
 export type CalendarEvent = {
   id: string;
@@ -9,6 +9,7 @@ export type CalendarEvent = {
   status: AppointmentStatus;
   color: string;
   notes: string | null;
+  patient_id: string | null;
   patient_first_name: string;
   patient_middle_name: string | null;
   patient_last_name: string;
@@ -18,6 +19,7 @@ export type CalendarEvent = {
 export type CommunicationEntry = {
   id: string;
   date: string;
+  patient_id: string | null;
   patient_first_name: string;
   patient_middle_name: string | null;
   patient_last_name: string;
@@ -84,5 +86,13 @@ export type Dentist = {
 export type StaffMember = {
   id: string;
   name: string;
+  created_at: string;
+};
+
+export type Patient = {
+  id: string;
+  first_name: string;
+  middle_name: string | null;
+  last_name: string;
   created_at: string;
 };

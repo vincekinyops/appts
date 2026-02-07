@@ -1,0 +1,179 @@
+-- Seed data for local/dev environments
+
+insert into public.dentists (id, name)
+values
+  (gen_random_uuid(), 'Dr. Ava Brooks'),
+  (gen_random_uuid(), 'Dr. Noah Patel'),
+  (gen_random_uuid(), 'Dr. Mia Chen'),
+  (gen_random_uuid(), 'Dr. Liam Rivera'),
+  (gen_random_uuid(), 'Dr. Sofia Morales'),
+  (gen_random_uuid(), 'Dr. Ethan Kim'),
+  (gen_random_uuid(), 'Dr. Harper Singh'),
+  (gen_random_uuid(), 'Dr. Lucas Wright'),
+  (gen_random_uuid(), 'Dr. Isla Nguyen'),
+  (gen_random_uuid(), 'Dr. Owen Carter');
+
+insert into public.staff (id, name)
+values
+  (gen_random_uuid(), 'Alex Martin'),
+  (gen_random_uuid(), 'Jordan Lee'),
+  (gen_random_uuid(), 'Taylor Reed'),
+  (gen_random_uuid(), 'Morgan Diaz'),
+  (gen_random_uuid(), 'Riley Brooks'),
+  (gen_random_uuid(), 'Casey Patel'),
+  (gen_random_uuid(), 'Avery Chen'),
+  (gen_random_uuid(), 'Quinn Rivera'),
+  (gen_random_uuid(), 'Parker Morales'),
+  (gen_random_uuid(), 'Skyler Kim');
+
+insert into public.patients (id, first_name, middle_name, last_name)
+values
+  (gen_random_uuid(), 'Harper', null, 'Lane'),
+  (gen_random_uuid(), 'Mateo', null, 'Reed'),
+  (gen_random_uuid(), 'Aria', null, 'Stone'),
+  (gen_random_uuid(), 'Luca', null, 'Reed'),
+  (gen_random_uuid(), 'Zoe', null, 'Carter'),
+  (gen_random_uuid(), 'Kai', null, 'Brooks'),
+  (gen_random_uuid(), 'Mila', null, 'Cruz'),
+  (gen_random_uuid(), 'Ezra', null, 'Ford'),
+  (gen_random_uuid(), 'Isla', null, 'Grant'),
+  (gen_random_uuid(), 'Owen', null, 'Hayes'),
+  (gen_random_uuid(), 'Nora', null, 'Pierce'),
+  (gen_random_uuid(), 'Jace', null, 'Young'),
+  (gen_random_uuid(), 'Ivy', null, 'Cole'),
+  (gen_random_uuid(), 'Theo', null, 'Bell'),
+  (gen_random_uuid(), 'Ruby', null, 'Fox'),
+  (gen_random_uuid(), 'Community', null, 'Event'),
+  (gen_random_uuid(), 'Team', null, 'Training'),
+  (gen_random_uuid(), 'Team', null, 'Prep'),
+  (gen_random_uuid(), 'Clinic', null, 'Maintenance'),
+  (gen_random_uuid(), 'Community', null, 'Webinar'),
+  (gen_random_uuid(), 'Ava', null, 'Park'),
+  (gen_random_uuid(), 'Leo', null, 'Cruz'),
+  (gen_random_uuid(), 'Community', null, 'Visit'),
+  (gen_random_uuid(), 'Mia', null, 'Ross'),
+  (gen_random_uuid(), 'Evan', null, 'Cole'),
+  (gen_random_uuid(), 'Team', null, 'Review'),
+  (gen_random_uuid(), 'Nora', null, 'Hill'),
+  (gen_random_uuid(), 'Owen', null, 'Clark'),
+  (gen_random_uuid(), 'Community', null, 'Workshop'),
+  (gen_random_uuid(), 'Ivy', null, 'Park'),
+  (gen_random_uuid(), 'Max', null, 'Bell'),
+  (gen_random_uuid(), 'Team', null, 'Huddle'),
+  (gen_random_uuid(), 'Lia', null, 'Stone'),
+  (gen_random_uuid(), 'Noah', null, 'Dean'),
+  (gen_random_uuid(), 'Team', null, 'Debrief'),
+  (gen_random_uuid(), 'Mason', null, 'Clark'),
+  (gen_random_uuid(), 'Ava', null, 'Diaz'),
+  (gen_random_uuid(), 'Logan', null, 'Price'),
+  (gen_random_uuid(), 'Ella', null, 'James'),
+  (gen_random_uuid(), 'Henry', null, 'Scott');
+
+with inserted_events as (
+  insert into public.calendar_events (
+    id,
+    patient_id,
+    event_type,
+    title,
+    date,
+    time,
+    status,
+    color,
+    notes,
+    patient_first_name,
+    patient_middle_name,
+    patient_last_name
+  )
+  values
+    (gen_random_uuid(), (select id from public.patients where first_name = 'Harper' and last_name = 'Lane' limit 1), 'appointment', 'Checkup - Harper Lane', '2026-02-03', '09:00', 'confirmed', '#f97316', 'Routine checkup', 'Harper', null, 'Lane'),
+    (gen_random_uuid(), (select id from public.patients where first_name = 'Mateo' and last_name = 'Reed' limit 1), 'appointment', 'Cleaning - Mateo Reed', '2026-02-04', '10:30', 'confirmed', '#f97316', 'First visit cleaning', 'Mateo', null, 'Reed'),
+    (gen_random_uuid(), (select id from public.patients where first_name = 'Aria' and last_name = 'Stone' limit 1), 'appointment', 'Consult - Aria Stone', '2026-02-05', '13:15', 'ongoing', '#22c55e', 'Orthodontic consult', 'Aria', null, 'Stone'),
+    (gen_random_uuid(), (select id from public.patients where first_name = 'Luca' and last_name = 'Reed' limit 1), 'appointment', 'Follow-up - Luca Reed', '2026-02-06', '15:00', 'completed', '#3b82f6', 'Post-op follow-up', 'Luca', null, 'Reed'),
+    (gen_random_uuid(), (select id from public.patients where first_name = 'Zoe' and last_name = 'Carter' limit 1), 'appointment', 'Exam - Zoe Carter', '2026-02-07', '11:00', 'confirmed', '#f97316', 'Annual exam', 'Zoe', null, 'Carter'),
+    (gen_random_uuid(), (select id from public.patients where first_name = 'Kai' and last_name = 'Brooks' limit 1), 'appointment', 'Emergency - Kai Brooks', '2026-02-08', '14:00', 'no_show', '#a855f7', 'Rescheduled', 'Kai', null, 'Brooks'),
+    (gen_random_uuid(), (select id from public.patients where first_name = 'Mila' and last_name = 'Cruz' limit 1), 'appointment', 'Ortho check - Mila Cruz', '2026-02-09', '09:45', 'ongoing', '#22c55e', 'Bracket adjustment', 'Mila', null, 'Cruz'),
+    (gen_random_uuid(), (select id from public.patients where first_name = 'Ezra' and last_name = 'Ford' limit 1), 'appointment', 'Consult - Ezra Ford', '2026-02-10', '08:30', 'confirmed', '#f97316', 'Initial consult', 'Ezra', null, 'Ford'),
+    (gen_random_uuid(), (select id from public.patients where first_name = 'Isla' and last_name = 'Grant' limit 1), 'appointment', 'Checkup - Isla Grant', '2026-02-11', '12:00', 'completed', '#3b82f6', 'Routine check', 'Isla', null, 'Grant'),
+    (gen_random_uuid(), (select id from public.patients where first_name = 'Owen' and last_name = 'Hayes' limit 1), 'appointment', 'Exam - Owen Hayes', '2026-02-12', '16:00', 'confirmed', '#f97316', 'School year exam', 'Owen', null, 'Hayes'),
+    (gen_random_uuid(), (select id from public.patients where first_name = 'Nora' and last_name = 'Pierce' limit 1), 'appointment', 'Cleaning - Nora Pierce', '2026-02-13', '10:00', 'ongoing', '#22c55e', 'Deep cleaning', 'Nora', null, 'Pierce'),
+    (gen_random_uuid(), (select id from public.patients where first_name = 'Jace' and last_name = 'Young' limit 1), 'appointment', 'Consult - Jace Young', '2026-02-14', '09:30', 'confirmed', '#f97316', 'Implant consult', 'Jace', null, 'Young'),
+    (gen_random_uuid(), (select id from public.patients where first_name = 'Ivy' and last_name = 'Cole' limit 1), 'appointment', 'Follow-up - Ivy Cole', '2026-02-15', '15:30', 'completed', '#3b82f6', 'Post-op review', 'Ivy', null, 'Cole'),
+    (gen_random_uuid(), (select id from public.patients where first_name = 'Theo' and last_name = 'Bell' limit 1), 'appointment', 'Checkup - Theo Bell', '2026-02-16', '11:15', 'confirmed', '#f97316', 'Routine check', 'Theo', null, 'Bell'),
+    (gen_random_uuid(), (select id from public.patients where first_name = 'Ruby' and last_name = 'Fox' limit 1), 'appointment', 'Exam - Ruby Fox', '2026-02-17', '13:45', 'ongoing', '#22c55e', 'Cavity exam', 'Ruby', null, 'Fox'),
+    (gen_random_uuid(), (select id from public.patients where first_name = 'Community' and last_name = 'Event' limit 1), 'event', 'School Outreach Session', '2026-02-18', '10:00', 'confirmed', '#f97316', 'Community session', 'Community', null, 'Event'),
+    (gen_random_uuid(), (select id from public.patients where first_name = 'Team' and last_name = 'Training' limit 1), 'event', 'Staff Training', '2026-02-19', '14:00', 'confirmed', '#f97316', 'Training module', 'Team', null, 'Training'),
+    (gen_random_uuid(), (select id from public.patients where first_name = 'Team' and last_name = 'Prep' limit 1), 'event', 'Health Fair Prep', '2026-02-20', '09:00', 'confirmed', '#f97316', 'Prep work', 'Team', null, 'Prep'),
+    (gen_random_uuid(), (select id from public.patients where first_name = 'Clinic' and last_name = 'Maintenance' limit 1), 'event', 'Clinic Maintenance', '2026-02-21', '16:30', 'confirmed', '#f97316', 'Facilities check', 'Clinic', null, 'Maintenance'),
+    (gen_random_uuid(), (select id from public.patients where first_name = 'Community' and last_name = 'Webinar' limit 1), 'event', 'Community Webinar', '2026-02-22', '12:30', 'confirmed', '#f97316', 'Online session', 'Community', null, 'Webinar')
+  returning id
+)
+select * from inserted_events;
+
+insert into public.calendar_events (
+  id,
+  patient_id,
+  event_type,
+  title,
+  date,
+  time,
+  status,
+  color,
+  notes,
+  patient_first_name,
+  patient_middle_name,
+  patient_last_name
+)
+values
+  (gen_random_uuid(), (select id from public.patients where first_name = 'Ava' and last_name = 'Park' limit 1), 'appointment', 'Exam - Ava Park', '2026-02-03', '10:15', 'confirmed', '#f97316', 'School exam', 'Ava', null, 'Park'),
+  (gen_random_uuid(), (select id from public.patients where first_name = 'Leo' and last_name = 'Cruz' limit 1), 'appointment', 'Cleaning - Leo Cruz', '2026-02-03', '13:30', 'ongoing', '#22c55e', 'Cleaning visit', 'Leo', null, 'Cruz'),
+  (gen_random_uuid(), (select id from public.patients where first_name = 'Community' and last_name = 'Visit' limit 1), 'event', 'Community Visit', '2026-02-03', '15:30', 'confirmed', '#f97316', 'Outreach visit', 'Community', null, 'Visit'),
+  (gen_random_uuid(), (select id from public.patients where first_name = 'Mia' and last_name = 'Ross' limit 1), 'appointment', 'Consult - Mia Ross', '2026-02-04', '09:15', 'confirmed', '#f97316', 'Initial consult', 'Mia', null, 'Ross'),
+  (gen_random_uuid(), (select id from public.patients where first_name = 'Evan' and last_name = 'Cole' limit 1), 'appointment', 'Follow-up - Evan Cole', '2026-02-04', '14:45', 'completed', '#3b82f6', 'Follow-up notes', 'Evan', null, 'Cole'),
+  (gen_random_uuid(), (select id from public.patients where first_name = 'Team' and last_name = 'Review' limit 1), 'event', 'Supplies Review', '2026-02-04', '16:00', 'confirmed', '#f97316', 'Inventory review', 'Team', null, 'Review'),
+  (gen_random_uuid(), (select id from public.patients where first_name = 'Nora' and last_name = 'Hill' limit 1), 'appointment', 'Checkup - Nora Hill', '2026-02-10', '11:00', 'confirmed', '#f97316', 'Routine checkup', 'Nora', null, 'Hill'),
+  (gen_random_uuid(), (select id from public.patients where first_name = 'Owen' and last_name = 'Clark' limit 1), 'appointment', 'Exam - Owen Clark', '2026-02-10', '14:15', 'ongoing', '#22c55e', 'Exam follow-up', 'Owen', null, 'Clark'),
+  (gen_random_uuid(), (select id from public.patients where first_name = 'Community' and last_name = 'Workshop' limit 1), 'event', 'Dental Workshop', '2026-02-10', '16:30', 'confirmed', '#f97316', 'Workshop session', 'Community', null, 'Workshop'),
+  (gen_random_uuid(), (select id from public.patients where first_name = 'Ivy' and last_name = 'Park' limit 1), 'appointment', 'Cleaning - Ivy Park', '2026-02-14', '08:45', 'confirmed', '#f97316', 'Cleaning session', 'Ivy', null, 'Park'),
+  (gen_random_uuid(), (select id from public.patients where first_name = 'Max' and last_name = 'Bell' limit 1), 'appointment', 'Consult - Max Bell', '2026-02-14', '12:15', 'no_show', '#a855f7', 'Reschedule needed', 'Max', null, 'Bell'),
+  (gen_random_uuid(), (select id from public.patients where first_name = 'Team' and last_name = 'Huddle' limit 1), 'event', 'Team Huddle', '2026-02-14', '17:00', 'confirmed', '#f97316', 'Weekly huddle', 'Team', null, 'Huddle'),
+  (gen_random_uuid(), (select id from public.patients where first_name = 'Lia' and last_name = 'Stone' limit 1), 'appointment', 'Exam - Lia Stone', '2026-02-18', '09:00', 'confirmed', '#f97316', 'Annual exam', 'Lia', null, 'Stone'),
+  (gen_random_uuid(), (select id from public.patients where first_name = 'Noah' and last_name = 'Dean' limit 1), 'appointment', 'Checkup - Noah Dean', '2026-02-18', '13:00', 'ongoing', '#22c55e', 'Routine check', 'Noah', null, 'Dean'),
+  (gen_random_uuid(), (select id from public.patients where first_name = 'Team' and last_name = 'Debrief' limit 1), 'event', 'School Visit Debrief', '2026-02-18', '15:30', 'confirmed', '#f97316', 'Debrief session', 'Team', null, 'Debrief');
+
+insert into public.communications (
+  date,
+  patient_name,
+  patient_first_name,
+  patient_middle_name,
+  patient_last_name,
+  school_year,
+  current_dentist,
+  language,
+  date_called,
+  date_emailed,
+  referral_type,
+  notes,
+  created_by,
+  appointment_id
+)
+values
+  ('2026-02-03', 'Harper Lane', 'Harper', null, 'Lane', '2026', 'Dr. Ava Brooks', 'English', '2026-02-01', null, 'TU0', 'Confirmed appointment', 'Alex Martin', (select id from public.calendar_events where title = 'Checkup - Harper Lane' limit 1)),
+  ('2026-02-04', 'Mateo Reed', 'Mateo', null, 'Reed', '2026', 'Dr. Noah Patel', 'Spanish', '2026-02-02', '2026-02-03', 'TU0', 'Family requested morning slot', 'Jordan Lee', (select id from public.calendar_events where title = 'Cleaning - Mateo Reed' limit 1)),
+  ('2026-02-05', 'Aria Stone', 'Aria', null, 'Stone', '2026', 'Dr. Mia Chen', 'English', '2026-02-03', null, 'TUF', 'Orthodontic consult scheduled', 'Taylor Reed', (select id from public.calendar_events where title = 'Consult - Aria Stone' limit 1)),
+  ('2026-02-06', 'Luca Reed', 'Luca', null, 'Reed', '2026', 'Dr. Liam Rivera', 'English', '2026-02-04', null, 'FPP', 'Follow-up confirmed', 'Morgan Diaz', (select id from public.calendar_events where title = 'Follow-up - Luca Reed' limit 1)),
+  ('2026-02-07', 'Zoe Carter', 'Zoe', null, 'Carter', '2026', 'Dr. Sofia Morales', 'English', '2026-02-05', '2026-02-06', 'TU0', 'Sent appointment reminder', 'Riley Brooks', (select id from public.calendar_events where title = 'Exam - Zoe Carter' limit 1)),
+  ('2026-02-08', 'Kai Brooks', 'Kai', null, 'Brooks', '2026', 'Dr. Ethan Kim', 'English', '2026-02-06', null, 'TUF', 'Appointment rescheduled', 'Casey Patel', (select id from public.calendar_events where title = 'Emergency - Kai Brooks' limit 1)),
+  ('2026-02-09', 'Mila Cruz', 'Mila', null, 'Cruz', '2026', 'Dr. Harper Singh', 'English', '2026-02-07', null, 'FPP', 'Brace adjustment confirmed', 'Avery Chen', (select id from public.calendar_events where title = 'Ortho check - Mila Cruz' limit 1)),
+  ('2026-02-10', 'Ezra Ford', 'Ezra', null, 'Ford', '2026', 'Dr. Lucas Wright', 'English', '2026-02-08', null, 'TU0', 'Initial consult prep', 'Quinn Rivera', (select id from public.calendar_events where title = 'Consult - Ezra Ford' limit 1)),
+  ('2026-02-11', 'Isla Grant', 'Isla', null, 'Grant', '2026', 'Dr. Isla Nguyen', 'English', '2026-02-09', null, 'TU0', 'Routine check completed', 'Parker Morales', (select id from public.calendar_events where title = 'Checkup - Isla Grant' limit 1)),
+  ('2026-02-12', 'Owen Hayes', 'Owen', null, 'Hayes', '2026', 'Dr. Owen Carter', 'English', '2026-02-10', null, 'TUF', 'School exam outreach', 'Skyler Kim', (select id from public.calendar_events where title = 'Exam - Owen Hayes' limit 1)),
+  ('2026-02-13', 'Nora Pierce', 'Nora', null, 'Pierce', '2026', 'Dr. Ava Brooks', 'English', '2026-02-11', '2026-02-12', 'FPP', 'Deep cleaning prep', 'Alex Martin', (select id from public.calendar_events where title = 'Cleaning - Nora Pierce' limit 1)),
+  ('2026-02-14', 'Jace Young', 'Jace', null, 'Young', '2026', 'Dr. Noah Patel', 'English', '2026-02-12', null, 'TU0', 'Consult reminders sent', 'Jordan Lee', (select id from public.calendar_events where title = 'Consult - Jace Young' limit 1)),
+  ('2026-02-15', 'Ivy Cole', 'Ivy', null, 'Cole', '2026', 'Dr. Mia Chen', 'English', '2026-02-13', null, 'TUF', 'Post-op follow-up', 'Taylor Reed', (select id from public.calendar_events where title = 'Follow-up - Ivy Cole' limit 1)),
+  ('2026-02-16', 'Theo Bell', 'Theo', null, 'Bell', '2026', 'Dr. Liam Rivera', 'English', '2026-02-14', null, 'TU0', 'Routine check scheduled', 'Morgan Diaz', (select id from public.calendar_events where title = 'Checkup - Theo Bell' limit 1)),
+  ('2026-02-17', 'Ruby Fox', 'Ruby', null, 'Fox', '2026', 'Dr. Sofia Morales', 'English', '2026-02-15', null, 'FPP', 'Exam follow-up', 'Riley Brooks', (select id from public.calendar_events where title = 'Exam - Ruby Fox' limit 1)),
+  ('2026-02-03', 'Mason Clark', 'Mason', null, 'Clark', '2025', 'Dr. Ethan Kim', 'English', '2026-01-28', null, 'TUF', 'Requested afternoon slot', 'Casey Patel', null),
+  ('2026-02-04', 'Ava Diaz', 'Ava', null, 'Diaz', '2025', 'Dr. Harper Singh', 'English', '2026-01-30', '2026-02-01', 'TU0', 'Initial outreach completed', 'Avery Chen', null),
+  ('2026-02-05', 'Logan Price', 'Logan', null, 'Price', '2025', 'Dr. Lucas Wright', 'English', '2026-02-01', null, 'FPP', 'Awaiting confirmation', 'Quinn Rivera', null),
+  ('2026-02-06', 'Ella James', 'Ella', null, 'James', '2025', 'Dr. Isla Nguyen', 'English', '2026-02-02', null, 'TU0', 'Left voicemail', 'Parker Morales', null),
+  ('2026-02-07', 'Henry Scott', 'Henry', null, 'Scott', '2025', 'Dr. Owen Carter', 'English', '2026-02-03', null, 'TUF', 'Re-sent paperwork', 'Skyler Kim', null);

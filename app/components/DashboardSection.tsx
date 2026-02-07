@@ -2,7 +2,12 @@
 
 import { useMemo, useState } from "react";
 import type { CalendarEvent, CommunicationEntry } from "@/app/lib/types";
-import { referralOptions, statusColors, statusOptions } from "@/app/lib/constants";
+import {
+  referralOptions,
+  statusColors,
+  statusLabels,
+  statusOptions,
+} from "@/app/lib/constants";
 import { formatReadableDate } from "@/app/lib/formatters";
 
 type DashboardSectionProps = {
@@ -344,7 +349,7 @@ export function DashboardSection({
                   className="rounded-full px-2 py-0.5 text-[10px] font-medium text-white"
                   style={{ backgroundColor: statusColors[event.status] }}
                 >
-                  {event.status}
+                  {statusLabels[event.status]}
                 </span>
               </div>
               <p className="mt-2 text-xs text-[color:var(--foreground)]/65">
